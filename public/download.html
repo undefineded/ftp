@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace;
+        }
+
+        .clear:after {
+            content: "";
+            display: block;
+            height: 0;
+            visibility: hidden;
+            clear: both;
+        }
+
+        ul {
+            list-style: none
+        }
+
+        .__sTips {
+            display: none;padding: 5px 10px;font-size: 14px;color: #fff;background: #1f1f1f;opacity: .8;border-radius: 6px;position: fixed;top: 0;left: 0;
+        }
+
+        .path {
+            color: #555
+        }
+
+        .nowPath {
+            color: #0078cc
+        }
+
+        ul li {
+            font-size: 14px;
+            line-height: 25px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        ul li a {
+            line-height: 38px;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        .dir img {
+            width: 25px;
+            position: relative;
+            top: 6px;
+            padding-right: 8px;
+        }
+
+        .dir {
+            color: #ffae54;
+        }
+
+        .file img {
+            width: 21px;
+            position: relative;
+            top: 5px;
+            padding-right: 8px;
+        }
+
+        .file a {
+            overflow: hidden;
+            color: #247cba;
+            position: relative;
+        }
+
+        .cba {
+            color: #247cba;
+        }
+
+        #fileList {
+            padding-left: 55px;
+        }
+
+        #nowPath {
+            font-size: 14px;
+            padding-left: 20px
+        }
+
+        #nowPath span {
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        #upList {
+            font-size: 14px;
+            color: #ff3232;
+            line-height: 36px;
+            padding: 10px 15px
+        }
+
+        #upList span {
+            display: inline-block;
+            padding-right: 30px;
+            width: 20%;
+            overflow: hidden;
+            min-width: 150px
+        }
+
+        #upList .name {
+            float: left
+        }
+
+        #upList .size {
+            float: left;
+            min-width: 100px
+        }
+
+        #upList i {
+            font-style: normal
+        }
+
+        .chooseFile {
+            max-width:  400px;
+            /*width: 400px;*/
+            padding: 10px 20px;
+            text-align: center;
+            border: 2px dashed #dedede;
+            border-radius: 6px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .upBox {
+            display: none
+        }
+
+        #file {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            outline: none;
+            opacity: 0;
+            cursor: pointer
+        }
+
+        #upFile {
+            width: 120px;
+            height: 38px;
+            line-height: 40px;
+            border: none;
+            background: #247cba;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .upBtn {
+            cursor: pointer;
+            font-size: 14px
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px; /*对垂直流动条有效*/
+            height: 5px; /*对水平流动条有效*/
+        }
+
+        /*定义滚动条的轨道颜色、内阴影及圆角*/
+        /*::-webkit-scrollbar-track{*/
+        /*-webkit-box-shadow: inset 0 0 6px rgb(122, 122, 122);*/
+        /*background-color: #ffffff;*/
+        /*border-radius: 3px;*/
+        /*}*/
+
+
+        /*定义滑块颜色、内阴影及圆角*/
+        ::-webkit-scrollbar-thumb {
+            border-radius: 2px;
+            /*-webkit-box-shadow: inset 0 0 6px rgb(122, 122, 122);*/
+            background-color: rgba(142, 142, 142, 0.2);
+        }
+
+        .tool img {
+            opacity: .8;
+            width: 22px !important;
+        }
+
+        .tool {
+            padding: 0 5px
+        }
+
+        .toolSomeFile {
+            position: absolute;
+            left: -50px;
+            top: 0;
+            width: 50px;
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 1px -1px 10px 2px #ccc;
+            display: none;
+            z-index: 9;
+        }
+
+        .toolSomeFile ul {
+            padding: 0;
+            text-align: center;
+            color: #444;
+        }
+
+        .toolSomeFile ul li {
+            font-size: 12px !important;
+        }
+
+        .toolSomeFile a {
+            text-decoration: none;
+            color: #444;
+            letter-spacing: 0;
+            line-height: 1;
+        }
+
+        .modelBlack {
+            transition: .2s linear;
+            display: none;
+            opacity: 0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background: rgba(0, 0, 0, 0.5);
+            width: 100%;
+            height: 100%;
+            z-index: 99
+        }
+
+        .showFile {
+            transition: .2s linear;
+            display: none;
+            opacity: 0;
+            position: fixed;
+            width: 60%;
+            height: 800px;
+            background: #fff;
+            border-radius: 8px;
+            z-index: 100;
+            max-height: 90%;
+            left: 20%;
+            top: 40px;
+            overflow: auto
+        }
+        .showMedia{
+            display: none;
+            transition: .2s linear;
+            /*display: none;*/
+            /*opacity: 0;*/
+            position: fixed;
+            width: 60%;
+            height: 800px;
+            background: #fff;
+            border-radius: 8px;
+            z-index: 100;
+            max-height: 90%;
+            left: 20%;
+            top: 40px;
+            overflow: auto
+        }
+        .mediaBox{padding-top: 40px;}
+        .showFileModel {
+            width: 94%;
+            margin: 0 auto;
+            padding: 45px 0 15px 0;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.8;
+            letter-spacing: .2px;
+            height:88%;
+            overflow: auto
+        }
+
+        .close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+        }
+
+        .close img {
+            width: 40px;
+        }
+
+        .closeMedia {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+        }
+
+        .closeMedia img {
+            width: 34px;
+        }
+
+
+        .changeU_G {
+            width: 98%;
+            margin: 0 auto;
+            height: 30px;
+            line-height: 30px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            text-align: right;
+            padding-bottom: 4px;
+        }
+
+        .changeU_G select {
+            border: 1px solid #373737;
+            padding: 1px 2px;
+            border-radius: 4px;
+            outline: none
+        }
+
+        @media screen and (max-width: 700px) {
+            .showFile {
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                background: #fff;
+                border-radius:0;
+                z-index: 100;
+                left: 0;
+                top: 0;
+                max-height: 100%;
+                overflow: auto
+            }
+            .showMedia {
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                background: #fff;
+                border-radius:0;
+                z-index: 100;
+                left: 0;
+                top: 0;
+                max-height: 100%;
+                overflow: auto
+            }
+            .mediaBox{padding-top: 50px;}
+            .showFileModel {
+                width: 96%;
+                margin: 0 auto;
+                padding: 10% 0 5% 0;
+                color: #555;
+                font-size: 14px;
+                line-height: 1.8;
+                letter-spacing: .2px;
+                height: 85%;
+                overflow: auto
+            }
+        }
+    </style>
+</head>
+<body>
+<div>
+    <span class="upBtn">上传文件</span>
+</div>
+<div class="upBox">
+    <div style="padding-top: 30px">
+        <div class="chooseFile">
+            <img style="opacity: .5" src="./img/upFile.png" alt="">
+            <input id="file" multiple="multiple" type="file">
+        </div>
+        <div style="padding-top: 30px">
+            <input id="upFile" type="button" value="确认上传">
+        </div>
+    </div>
+    <div id="upList">
+
+    </div>
+</div>
+<div>
+    <p id="nowPath">
+        <span dir="0" onclick="openListDir($(this))" class="path nowPath">/file</span>
+    </p>
+    <input type="text" id="FolderName">
+    <div class="addFolder" style="font-size: 14px;padding-left: 20px">
+        新建文件夹
+    </div>
+</div>
+
+<ul id="fileList"></ul>
+<div class="modelBlack"></div>
+<div class="showFile">
+    <span class="close"><img src="./img/close.png" alt=""></span>
+    <div class="showFileModel">
+        <pre>
+
+        </pre>
+    </div>
+    <div class="changeU_G">
+        <select id="change_select">
+            <option value="utf-8">UTF-8</option>
+            <option value="gbk">GBK</option>
+        </select>
+    </div>
+</div>
+
+<div class="showMedia">
+    <span class="closeMedia"><img src="./img/close.png" alt=""></span>
+    <div class="mediaBox"></div>
+</div>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script>
+  let sTips = {
+    message: function (position, text) {
+      if ($('.__sTips').length > 0) {
+        return
+      }
+      let __sTips = '<span style="" class="__sTips">' + text + '</span>'
+      $('body').append(__sTips)
+      let __tips_width = $('.__sTips').css('width')
+      let __tips_padding_top = $('.__sTips').css('padding-top')
+      let __tips_height = $('.__sTips').css('height')
+      let __tips_padding_left = $('.__sTips').css('padding-left')
+      let __true_width = Number(__tips_width.replace(/[px]/g, '')) + (Number(__tips_padding_left.replace(/[px]/g, '')) * 2)
+      let __true_height = Number(__tips_height.replace(/[px]/g, '')) + (Number(__tips_padding_top.replace(/[px]/g, '')) * 2)
+      if (position === 'top') {
+        $('.__sTips').attr('style', 'left:calc(50% - ' + __true_width / 2 + 'px);top:calc(10%)')
+      }
+      if (position === 'center') {
+        $('.__sTips').attr('style', 'left:calc(50% - ' + __true_width / 2 + 'px);top:calc(50% - ' + __true_height / 2 + 'px)')
+      }
+      if (position === 'bottom') {
+        $('.__sTips').attr('style', 'left:calc(50% - ' + __true_width / 2 + 'px);top:calc(90%)')
+      }
+      $('.__sTips').fadeIn(400)
+      setTimeout(function () {
+        $('.__sTips').fadeOut(400)
+        setTimeout(function () {
+          $('.__sTips').remove()
+        }, 410)
+      }, 1200)
+    }
+  }
+</script>
+<script>
+
+
+  $.ajax({
+    type: 'post',
+    url: '/readFile.love',
+    data: {a:1},
+    processData: false,
+    success: function (d) {
+     console.log(d)
+    },
+    error: function (e) {
+      console.log(e)
+    }
+  })
+
+
+  let U_F = ''
+
+  function getFile(_u) {
+    let str = ''
+    U_F = (_u)
+    let toolStr = ''
+    let toolDirStr = ''
+    $.ajax({
+      type: 'post',
+      url: '/fileList',
+      data: {path: _u},
+      success: function (list) {
+        let dirArr = []
+        let fileArr = []
+        for(let i = 0;i<list.data.length; i++){
+          if (list.data[i].state === 'directory') {
+            dirArr.push(list.data[i])
+          }else {
+            fileArr.push(list.data[i])
+          }
+        }
+        let allArr = dirArr.concat(fileArr)
+        for (let i = 0; i < allArr.length; i++) {
+          if (allArr[i].state === 'directory') {
+            toolDirStr = '<div class="toolSomeFile">' +
+              '        <ul>' +
+              '            <li onclick="delDir(' + "'" + allArr[i].file + "'" + ')">删除</li>' +
+              '            <li onclick="openDir(' + "'" + allArr[i].file + "'" + ')">打开</li>' +
+              '        </ul>' +
+              '    </div>'
+            str += ('<li class="dir">' + toolDirStr + '<span onclick="toolFile($(this))" class="tool"><img src="./img/tool.png" alt="操作"></span><span><img src="./img/dir.png" alt=""></span><span onclick="openDir(' + "'" + allArr[i].file + "'" + ')">' + allArr[i].file + '</span></li>')
+          } else {
+            let formatDefault = "'utf-8'"
+            toolStr = '<div class="toolSomeFile">' +
+              '        <ul>' +
+              '            <li onclick="delFile(' + "'." + _u + '/' + allArr[i].file + "'" + ')">删除</li>' +
+              '            <li onclick="openFile(' + "'." + _u + '/' + allArr[i].file + "'" + ',' + formatDefault + ')">预览</li>' +
+              '            <li><a download="' + allArr[i].file + '" href=".' + _u + '/' + allArr[i].file + '">下载</a></li>' +
+              '        </ul>' +
+              '    </div>'
+            str += ('<li class="file">' + toolStr + '<span onclick="toolFile($(this))" class="tool"><img src="./img/tool.png" alt="操作"></span><span><img src="./img/file/'+ allArr[i].file.split('.')[allArr[i].file.split('.').length-1] +'.png" onerror="this.src ='+ "'./img/file.png'" +'" alt=""></span><a download="' + allArr[i].file + '" href=".' + _u + '/' + allArr[i].file + '">' + allArr[i].file + '</a></li>')
+          }
+        }
+        $('#fileList').html(str)
+      }
+    })
+  }
+
+  getFile('/file')
+
+  function openDir(y) {
+    let _p = ''
+    for (let i = 0; i < $('.path').length; i++) {
+      _p += $('.path').eq(i).text()
+    }
+    $('.path').removeClass('nowPath')
+    let dir = $('#nowPath').find('span').length
+    $('#nowPath').append('<span class="path nowPath" onclick="openListDir($(this))" dir="' + dir + '">/' + y + '</span>')
+    getFile(_p + '/' + y)
+  }
+
+  function openListDir($this) {
+    // console.log($this)
+    let m = ''
+    for (let i = 0; i < $this.attr('dir') * 1 + 1; i++) {
+      m += $('#nowPath').find('span').eq(i).text()
+    }
+    for (let u = $this.attr('dir') * 1 + 1; u < $('#nowPath').find('span').length; u++) {
+      $('#nowPath').find('span').eq(u).remove()
+    }
+    // console.log(m)
+    getFile(m)
+  }
+
+  let allFiles = ''
+  let indexLength = 0
+
+  function upload(file) {
+    let formData = new FormData()
+    formData.append('avatar', file)
+    $.ajax({
+      type: 'post',
+      url: '/upload',
+      data: formData,
+      contentType: false,
+      // contentType: multipart/form-data(用于文件上传)
+      processData: false,
+      success: function () {
+        $('#upList').find('.clear').eq(indexLength - 1).addClass('cba').find('i').text('上传成功')
+        if (indexLength >= allFiles.length) {
+          sTips.message('top', '上传完毕')
+          getFile(U_F)
+          allFiles = ''
+          indexLength = 0
+          return
+        }
+        upload(allFiles[indexLength])
+        indexLength++
+      },
+      error: function (e) {
+        console.log(e)
+        $('#upList').find('.clear').eq(indexLength - 1).find('i').text('上传失败')
+        upload(allFiles[indexLength])
+        indexLength++
+      }
+    })
+  }
+  $('#file').on('change', function () {
+    allFiles = ''
+    indexLength = 0
+    let file = document.getElementById('file')
+    allFiles = file.files
+    allLength = file.files
+    // console.log(allFiles)
+    let strFileList = ''
+    for (let i = 0; i < file.files.length; i++) {
+      strFileList += '<div class="clear"><span class="name">' + file.files[i].name + '</span><span class="size">' + (file.files[i].size / 1024).toFixed(2) + 'kb' + '</span><i>等待上传</i></div>'
+    }
+    $('#upList').html(strFileList)
+  })
+
+  $('#upFile').on('click', function () {
+    $('#upList').find('.clear').find('i').text('上传中')
+    upload(allFiles[indexLength])
+    indexLength++
+  })
+  let flg = true
+  $('.upBtn').on('click', function () {
+    if (flg) {
+      $('.upBox').show(500)
+    } else {
+      $('.upBox').hide(500)
+    }
+    flg = !flg
+  })
+
+  function mkdir(_u) {
+    $.ajax({
+      type: 'post',
+      url: '/mkdir',
+      data: {name: _u},
+      success: function (data) {
+        if (data.code !== 200) {
+          sTips.message('top', data.data)
+          return
+        }
+        sTips.message('top', '创建成功')
+        getFile(U_F)
+      }
+    })
+  }
+
+  $('.addFolder').on('click', function () {
+    let name = $('#FolderName').val()
+    let nFlg = true
+    let str = '/ \\ : * " < > | ？'
+    for (let i = 0; i < str.split(' ').length; i++) {
+      if (name.indexOf(str.split(' ')[i]) !== -1) {
+        nFlg = false
+      }
+    }
+    if (name === '') {
+      sTips.message('top', '文件夹名字不能为空')
+      return
+    }
+    if (!nFlg) {
+      sTips.message('top', '不能包含/ \\ : * " < > | ？')
+      return
+    }
+    mkdir(U_F + '/' + name)
+  })
+
+  function toolFile($this) {
+    let tool = $('.tool')
+    let _index = tool.index($this)
+    tool.find('img').attr('src', './img/tool.png')
+    tool.eq(_index).find('img').attr('src', './img/redTool.png')
+    console.log(_index)
+    $('.toolSomeFile').hide(50).eq(_index).show(50)
+  }
+
+  function delFile(path) {
+    let _p = ''
+    for (let i = 0; i < $('.path').length; i++) {
+      _p += $('.path').eq(i).text()
+    }
+    console.log(_p)
+    $.ajax({
+      type: 'post',
+      url: '/delFile',
+      data: {'filepath': path},
+      success: function (data) {
+        if (data.code !== 200) {
+          sTips.message('top', data.data)
+          return
+        }
+        sTips.message('top', '删除成功')
+        getFile(U_F)
+      },
+      error: function (e) {
+        console.log(e)
+      }
+    })
+  }
+
+  function delDir(path) {
+    let _p = ''
+    for (let i = 0; i < $('.path').length; i++) {
+      _p += $('.path').eq(i).text()
+    }
+    $.ajax({
+      type: 'post',
+      url: '/delDir',
+      data: {'filepath': _p + '/' + path},
+      success: function (data) {
+        if (data.code !== 200) {
+          sTips.message('top', data.data)
+          return
+        }
+        sTips.message('top', '删除成功')
+        getFile(U_F)
+      },
+      error: function (e) {
+        console.log(e)
+        sTips.message('top', '删除失败')
+      }
+    })
+  }
+
+  let canChange = ''
+
+  function openFile(path, format) {
+    let readArr = ['vue', 'txt', 'js', 'json', 'ini']
+    let watchArr = ['mp3', 'mp4', 'flv', 'png', 'jpeg' ,'jpg', 'gif', 'bmp']
+    let _filePath = path.split('.')
+    if (readArr.indexOf(_filePath[_filePath.length - 1]) !== -1) {
+      canChange = path
+      $.ajax({
+        type: 'post',
+        url: '/readFile',
+        data: {'filepath': path, 'format': format},
+        success: function (data) {
+          if (data.code !== 200) {
+            sTips.message('top', data.data)
+            return
+          }
+          console.log(data)
+          $('.showFileModel pre').html(escapeHTML(data.data))
+          show()
+        },
+        error: function (e) {
+          sTips.message('top', '读取失败')
+          console.log(e)
+        }
+      })
+    } else if (watchArr.indexOf(_filePath[_filePath.length - 1]) !== -1) {
+      let mediaArr = ['mp4', 'flv']
+      let audioArr = ['mp3']
+      let picArr = [ 'png', 'jpeg' ,'jpg', 'gif', 'bmp']
+      if(mediaArr.indexOf(_filePath[_filePath.length - 1]) !== -1){
+        $('.showMedia .mediaBox').html('<video style="width: 100%;" src="'+ path +'" controls="controls"></video>')
+      }else if(audioArr.indexOf(_filePath[_filePath.length - 1]) !== -1){
+        $('.showMedia .mediaBox').html('<audio style="width: 100%;" src="'+ path +'" controls="controls"></audio>')
+      }else if(picArr.indexOf(_filePath[_filePath.length - 1]) !== -1){
+        $('.showMedia .mediaBox').html('<img style="width: 100%;" src="'+ path +'" alt="文件展示">')
+      }
+      showMedia()
+    } else {
+      sTips.message('top', '格式暂时不支持')
+    }
+  }
+  function escapeHTML(a) {
+    a = "" + a;
+    return a.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+  }
+
+  function unescapeHTML(a) {
+    a = "" + a;
+    return a.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&apos;/g, "'");
+  }
+
+  function close() {
+    $('.modelBlack').css('opacity','0')
+    $('.showFile').css('opacity','0')
+    setTimeout(function () {
+      $('.modelBlack').hide()
+      $('.showFile').hide()
+    },200)
+    $('#change_select').val('utf-8')
+  }
+
+  function show() {
+    $('.modelBlack').show()
+    $('.showFile').show()
+    setTimeout(function () {
+      $('.modelBlack').css('opacity','1')
+      $('.showFile').css('opacity','1')
+    },0)
+  }
+
+  function closeMedia() {
+    $('.modelBlack').css('opacity','0')
+    $('.showMedia').css('opacity','0')
+    setTimeout(function () {
+      $('.modelBlack').hide()
+      $('.showMedia').hide()
+    },200)
+  }
+
+  function showMedia() {
+    $('.modelBlack').show()
+    $('.showMedia').show()
+    setTimeout(function () {
+      $('.modelBlack').css('opacity','1')
+      $('.showMedia').css('opacity','1')
+    },0)
+  }
+
+  $('.close').on('click', function () {
+    close()
+  })
+  $('.closeMedia').on('click', function () {
+    closeMedia()
+  })
+  $('#change_select').on('change', function () {
+    openFile(canChange, $(this).val())
+  })
+</script>
+</html>
